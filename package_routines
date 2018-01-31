@@ -197,7 +197,7 @@ pkg_check_requirement()
 	QJDK7_PATH="$($CMD_GETCFG $QJDK7_NAME $SYS_QPKG_CONF_FIELD_INSTALL_PATH -f $SYS_QPKG_CONFIG_FILE)"
 	QJDK8_PATH="$($CMD_GETCFG $QJDK8_NAME $SYS_QPKG_CONF_FIELD_INSTALL_PATH -f $SYS_QPKG_CONFIG_FILE)"
 	QJDK9_PATH="$($CMD_GETCFG $QJDK9_NAME $SYS_QPKG_CONF_FIELD_INSTALL_PATH -f $SYS_QPKG_CONFIG_FILE)"
-	if [ -z "$QJDK7_PATH" && -z "$QJDK8_PATH" && -z "$QJDK9_PATH" ]; then
+	if [[ -z "$QJDK7_PATH" && -z "$QJDK8_PATH" && -z "$QJDK9_PATH" ]]; then
 		err_log "Neither of QJDK 7/8/9 is installed. See 'https://www.qnapclub.eu/en'."
 	else
 		$CMD_ECHO -e "--- QJDK 7/8/9... found"
@@ -216,6 +216,7 @@ pkg_check_requirement()
 # Third entry point.
 pkg_pre_install()
 {
+	$CMD_ECHO ""
 }
 
 # NOTES:
@@ -243,29 +244,33 @@ pkg_install()
 	
 	# cleanup
 	$CMD_RM -rf "lib"
-	$CMD_MV "apache-maven-3.5.2-bin/*" "./"
-	$CMD_RM -rf "apache-maven-3.5.2-bin"
+	$CMD_MV "apache-maven-3.5.2" "dist"
 	
-	# create and fill the JAVA_HOME user preference file
-	$CMD_ECHO -e "\n[Trying to detect installed JDK...]"
-	touch "$MVN_DATA_JH"
-	if [ ! -z "$QJDK7_PATH" ]; then
-		$CMD_ECHO -e "--- $QJDK7_NAME... found"
-		$CMD_ECHO -e "# export JAVA_HOME=\"$QJDK7_PATH\"" >> "$MVN_DATA_JH"
-	fi
-	if [ ! -z "$QJDK8_PATH" ]; then
-		$CMD_ECHO -e "--- $QJDK8_NAME... found"
-		$CMD_ECHO -e "# export JAVA_HOME=\"$QJDK8_PATH\"" >> "$MVN_DATA_JH"
-	fi
-	if [ ! -z "$QJDK9_PATH" ]; then
-		$CMD_ECHO -e "--- $QJDK9_NAME... found"
-		$CMD_ECHO -e "# export JAVA_HOME=\"$QJDK9_PATH\"" >> "$MVN_DATA_JH"
+	# create and fill the JAVA_HOME user preference file if needed
+	if [ ! -f "$MVN_DATA_JH" ]; then
+		$CMD_ECHO -e "\n[Trying to detect installed JDK...]"
+		$CMD_TOUCH "$MVN_DATA_JH"
+		if [ ! -z "$QJDK7_PATH" ]; then
+			$CMD_ECHO -e "--- $QJDK7_NAME... found"
+			$CMD_ECHO -e "# export JAVA_HOME=\"$QJDK7_PATH\"" >> "$MVN_DATA_JH"
+		fi
+		if [ ! -z "$QJDK8_PATH" ]; then
+			$CMD_ECHO -e "--- $QJDK8_NAME... found"
+			$CMD_ECHO -e "# export JAVA_HOME=\"$QJDK8_PATH\"" >> "$MVN_DATA_JH"
+		fi
+		if [ ! -z "$QJDK9_PATH" ]; then
+			$CMD_ECHO -e "--- $QJDK9_NAME... found"
+			$CMD_ECHO -e "# export JAVA_HOME=\"$QJDK9_PATH\"" >> "$MVN_DATA_JH"
+		fi
 	fi
     
-    # create and fill the MAVEN_OPTS user preference file
-    $CMD_ECHO -e "\n[Creating a user preference file for MAVEN_OPTS...]"
-	touch "$MVN_DATA_MO"
-	$CMD_ECHO -e "# export MAVEN_OPTS=" >> "$MVN_DATA_MO"
+    # create and fill the MAVEN_OPTS user preference file if needed
+    if [ ! -f "$MVN_DATA_MO" ]; then
+    	$CMD_ECHO -e "\n[Creating a user preference file for MAVEN_OPTS...]"
+		$CMD_TOUCH "$MVN_DATA_MO"
+		$CMD_ECHO -e "# export MAVEN_OPTS=" >> "$MVN_DATA_MO"
+		$CMD_ECHO -e "--- Done!"
+    fi
 
 	# and finally, we're done...
 	$CMD_ECHO -e "\nInstallation finished."

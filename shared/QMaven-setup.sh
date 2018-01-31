@@ -18,7 +18,7 @@ MVN_DATA_MO="$MVN_DATA_FOLDER/maven_opts.sh"
 
 # setup Maven environment
 echo "--- Setting up PATH..."
-export PATH="$QPKG_ROOT/bin:$PATH"
+export PATH="$QPKG_ROOT/dist/bin:$PATH"
 if [ -f "$MVN_DATA_JH" ]; then
 	echo "--- Setting up JAVA_HOME (user preference)..."
 	/bin/sh "$MVN_DATA_JH"
